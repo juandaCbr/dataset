@@ -6,7 +6,7 @@
   <title>Dataset ICA Colombia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -18,7 +18,7 @@
       </button>
       <a class="product" href="#">
         <svg class="mark" viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
-          <rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/>
+          <rect x="1" y="1" width="26" height="26" rx="9" fill="var(--accent)"/>
           <path d="M8 8h12M8 12.5h12M8 17h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
           <circle cx="19.5" cy="18.5" r="2.6" fill="none" stroke="#fff" stroke-width="1.8"/>
         </svg>
@@ -44,6 +44,7 @@
       </div>
 
       <form id="filters" class="filters" role="search" onsubmit="return false">
+        <p class="filters-title">Buscar</p>
         <label class="field">
           <span>Departamento</span>
           <select id="depSelect"></select>
@@ -68,13 +69,16 @@
 
     <!-- Hoja de trabajo -->
     <main class="sheet" id="main">
-      <div class="title-row">
-        <div class="title-text">
-          <h1 id="bookTitle">Cargando…</h1>
-          <p id="bookMeta" class="meta"></p>
+      <section class="book-head">
+        <div class="title-row">
+          <div class="title-text">
+            <h1 id="bookTitle">Cargando…</h1>
+            <p id="bookMeta" class="meta"></p>
+          </div>
+          <div class="title-actions" id="titleActions"></div>
         </div>
-        <div class="title-actions" id="titleActions"></div>
-      </div>
+        <dl id="bookStats" class="stats"></dl>
+      </section>
 
       <section id="adminStrip" class="admin-strip" hidden aria-label="Carga de CSV">
         <label id="dropzone" class="dropzone" tabindex="0">
@@ -84,8 +88,8 @@
           <span id="fileHint" class="hint">Solo .csv exportado de Excel</span>
         </label>
         <div class="segmented" role="radiogroup" aria-label="Al subir un CSV">
-          <label><input type="radio" name="mode" value="replace" checked><span>Reemplazar registros</span></label>
-          <label><input type="radio" name="mode" value="append"><span>Agregar a los existentes</span></label>
+          <label><input type="radio" name="mode" value="replace" checked><span>Reemplazar todo</span></label>
+          <label><input type="radio" name="mode" value="append"><span>Agregar filas</span></label>
         </div>
       </section>
 

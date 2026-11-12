@@ -153,6 +153,7 @@
 
     renderNav();
     $("bookTitle").textContent = sheet.name;
+    $("bookStats").innerHTML = "";
     $("adminStrip").hidden = !admin;
 
     const e = entry();
@@ -229,11 +230,13 @@
     const dataCols = data.columns.filter((_, i) => ![id.n, id.dane, id.dep, id.mun].includes(i));
     const colsShown = state.route.col ? dataCols.filter(matchesColumn).length : dataCols.length;
 
-    const parts = [];
-    parts.push(shown === total ? plural(total, "municipio", "municipios") : `${shown} de ${plural(total, "municipio", "municipios")}`);
-    parts.push(state.route.col ? `${colsShown} de ${plural(dataCols.length, "columna", "columnas")} con “${state.route.col}”` : plural(dataCols.length, "columna", "columnas"));
-    if (data.updatedAt) parts.push(`actualizado ${fmtDate(data.updatedAt)}`);
-    $("bookMeta").textContent = total ? parts.join(" · ") : sheet.desc;
+    $("bookMeta").textContent = sheet.desc;
+    const stat = (value, of, label) => `<div><dt>${label}</dt><dd><span class="big">${value}</span>${of ? `<span class="of"> de ${of}</span>` : ""}</dd></div>`;
+    $("bookStats").innerHTML = total ? [
+      stat(shown.toLocaleString("es-CO"), shown === total ? "" : total.toLocaleString("es-CO"), "Municipios"),
+      stat(colsShown.toLocaleString("es-CO"), state.route.col ? dataCols.length.toLocaleString("es-CO") : "", state.route.col ? `Columnas con “${esc(state.route.col)}”` : "Columnas"),
+      data.updatedAt ? `<div><dt>Última actualización</dt><dd><span class="date">${esc(fmtDate(data.updatedAt))}</span></dd></div>` : "",
+    ].join("") : "";
 
     const active = [state.route.dep, state.route.mun, state.route.col].filter(Boolean).length;
     let html = total ? `<button class="btn mobile-only" data-act="filters" type="button" aria-controls="sidebar">Buscar${active ? ` (${active})` : ""}</button>` : "";
@@ -283,7 +286,7 @@
       const { grp, sub } = splitName(data.columns[c]);
       const cls = [c === id.mun ? "stick" : "", numeric.has(c) ? "num" : ""].filter(Boolean).join(" ");
       return `<th${cls ? ` class="${cls}"` : ""} title="${esc(data.columns[c])}"><div class="th-text">${grp ? `<span class="grp">${highlight(grp, state.route.col)}</span>` : ""}<span class="sub">${highlight(sub, state.route.col)}</span></div></th>`;
-    }).join("") + (admin ? `<th class="col-actions"><span class="sr-only">Acciones</span></th>` : "");
+    }).join("");
 
     const body = rows.map(({ row, i }) => {
       const changed = edits.get(row);
@@ -299,20 +302,21 @@
         if (v === "") inner = `<span class="dash">—</span>`;
         else if (norm(v) === "no" || isNA(v)) inner = `<span class="no">${esc(v)}</span>`;
         else inner = `<div class="cell${v.length > 120 || v.includes("\n") ? " long" : ""}">${esc(v)}</div>`;
+        // Las acciones viven dentro de la columna fija de Municipio: nada queda fijo a la derecha.
+        if (admin && c === id.mun) inner = `<div class="mun-cell">${inner}<div class="row-actions">
+          <button class="icon-only" type="button" data-edit="${i}" aria-label="Editar ${esc(row[id.mun])}" title="Editar">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
+          <button class="icon-only del" type="button" data-delete="${i}" aria-label="Eliminar ${esc(row[id.mun])}" title="Eliminar">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg></button>
+        </div></div>`;
         return `<td${cls ? ` class="${cls}"` : ""}>${inner}</td>`;
       }).join("");
-      const actions = admin ? `<td class="col-actions"><div class="row-actions">
-        <button class="icon-only" type="button" data-edit="${i}" aria-label="Editar ${esc(row[id.mun])}" title="Editar">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></button>
-        <button class="icon-only del" type="button" data-delete="${i}" aria-label="Eliminar ${esc(row[id.mun])}" title="Eliminar">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg></button>
-      </div></td>` : "";
-      return `<tr>${tds}${actions}</tr>`;
+      return `<tr>${tds}</tr>`;
     }).join("");
 
     const none = state.route.col && !rest.length
       ? `<div class="state"><strong>Ninguna columna de este libro contiene “${esc(state.route.col)}”</strong><span class="muted">Se muestran solo las columnas de identificación.</span></div>` : "";
-    $("content").innerHTML = `${none}<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+    $("content").innerHTML = `${none}<div class="table-wrap"><table${admin ? ' class="admin-mode"' : ""}><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
   }
 
   // Ficha: un municipio leído de arriba abajo, agrupado por los encabezados de la matriz.
