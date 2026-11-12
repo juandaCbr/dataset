@@ -38,5 +38,10 @@
   "rows": 63,
   "columns": 60,
   "updatedAt": "2026-11-12T20:31:13.633Z"
+ },
+ "deducciones_exclusiones": {
+  "rows": 63,
+  "columns": 33,
+  "updatedAt": "2026-11-12T20:31:32.487Z"
  }
 }
