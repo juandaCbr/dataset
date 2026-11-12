@@ -8,5 +8,10 @@
   "rows": 64,
   "columns": 112,
   "updatedAt": "2026-11-12T20:29:34.992Z"
+ },
+ "sector_financiero": {
+  "rows": 63,
+  "columns": 129,
+  "updatedAt": "2026-11-12T20:30:11.216Z"
  }
 }
