@@ -29,6 +29,7 @@
         <a href="#" data-mode="consulta" class="mode-tab">Consulta</a>
         <a href="#" data-mode="admin" class="mode-tab">Administración</a>
       </nav>
+      <button id="logoutBtn" class="btn btn-ghost" type="button" hidden>Cerrar sesión</button>
       <button id="connectBtn" class="btn btn-ghost connect" type="button">
         <span class="dot" aria-hidden="true"></span><span id="connectLabel">Conectar GitHub</span>
       </button>
@@ -126,6 +127,28 @@
         <button class="btn" value="cancel" formnovalidate>Cancelar</button>
         <button id="applyEdit" class="btn btn-primary" type="button">Aplicar cambios</button>
       </footer>
+    </form>
+  </dialog>
+
+  <!-- Acceso a administración -->
+  <dialog id="loginDialog" class="modal" aria-labelledby="loginTitle">
+    <form id="loginForm">
+      <h2 id="loginTitle">Acceso a administración</h2>
+      <p class="meta">Ingresa tus credenciales para cargar, editar y guardar los libros del dataset.</p>
+      <label class="field">
+        <span>Usuario</span>
+        <input id="loginUser" type="text" autocomplete="username" spellcheck="false" required>
+      </label>
+      <label class="field">
+        <span>Contraseña</span>
+        <input id="loginPass" type="password" autocomplete="current-password" required>
+      </label>
+      <p id="loginMsg" class="meta" role="alert"></p>
+      <div class="modal-actions">
+        <span class="spacer"></span>
+        <button id="loginCancel" class="btn" type="button">Cancelar</button>
+        <button class="btn btn-primary" type="submit">Ingresar</button>
+      </div>
     </form>
   </dialog>
 

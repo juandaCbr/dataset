@@ -26,6 +26,50 @@
   const sheetBySlug = (slug) => sheets.find((s) => s.slug === slug) || sheets[0];
   const entry = () => state.cache[state.route.slug];
 
+  // ---------- Acceso a administración ----------
+  // Credenciales locales de la interfaz. No son seguridad real: el código es
+  // público, así que la escritura sigue protegida por el token de GitHub.
+  const AUTH_KEY = "dataset-ica.admin-session";
+  const ADMIN_USER = "admin";
+  const ADMIN_PASS = "123";
+
+  function isAdminAuthed() {
+    try { return sessionStorage.getItem(AUTH_KEY) === "1"; } catch (_) { return false; }
+  }
+
+  function requestAdminLogin() {
+    const dlg = $("loginDialog");
+    $("loginUser").value = "";
+    $("loginPass").value = "";
+    $("loginMsg").textContent = "";
+    $("loginMsg").className = "meta";
+    if (!dlg.open) dlg.showModal();
+    $("loginUser").focus();
+  }
+
+  function tryAdminLogin(ev) {
+    ev.preventDefault();
+    const user = $("loginUser").value.trim();
+    const pass = $("loginPass").value;
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      try { sessionStorage.setItem(AUTH_KEY, "1"); } catch (_) {}
+      $("loginDialog").close();
+      toast("Sesión iniciada como administrador.");
+      go({ mode: "admin" }, { push: true });
+      return;
+    }
+    $("loginMsg").textContent = "Usuario o contraseña incorrectos.";
+    $("loginMsg").className = "meta msg-error";
+    $("loginPass").value = "";
+    $("loginPass").focus();
+  }
+
+  function logoutAdmin() {
+    try { sessionStorage.removeItem(AUTH_KEY); } catch (_) {}
+    toast("Sesión cerrada.");
+    go({ mode: "consulta" }, { push: true });
+  }
+
   // Nombre de columna "Grupo — Subcolumna" en sus dos partes.
   function splitName(name) {
     const i = name.indexOf(" — ");
@@ -86,6 +130,10 @@
     return `#${r.slug}${qs ? `?${qs}` : ""}`;
   }
   function go(partial, { push = false } = {}) {
+    if (partial.mode === "admin" && !isAdminAuthed()) {
+      requestAdminLogin();
+      return;
+    }
     const prevSlug = state.route.slug;
     state.route = { ...state.route, ...partial };
     const hash = buildHash(state.route);
@@ -150,6 +198,7 @@
     });
     $("connectBtn").classList.toggle("on", GH.hasToken());
     $("connectLabel").textContent = GH.hasToken() ? "Conectado a GitHub" : "Conectar GitHub";
+    $("logoutBtn").hidden = !(admin && isAdminAuthed());
 
     renderNav();
     $("bookTitle").textContent = sheet.name;
@@ -630,6 +679,15 @@
   function bind() {
     window.addEventListener("hashchange", () => {
       const r = parseHash();
+      if (r.mode === "admin" && !isAdminAuthed()) {
+        r.mode = "consulta";
+        history.replaceState(null, "", buildHash(r));
+        const slugChanged = r.slug !== state.route.slug;
+        state.route = r;
+        if (slugChanged) openBook(); else render();
+        requestAdminLogin();
+        return;
+      }
       const slugChanged = r.slug !== state.route.slug;
       state.route = r;
       if (slugChanged) openBook(); else render();
@@ -706,6 +764,10 @@
     $("editFields").addEventListener("input", updateChanged);
     $("applyEdit").addEventListener("click", applyEdit);
 
+    $("loginForm").addEventListener("submit", tryAdminLogin);
+    $("loginCancel").addEventListener("click", () => $("loginDialog").close());
+    $("logoutBtn").addEventListener("click", logoutAdmin);
+
     $("connectBtn").addEventListener("click", openSettings);
     $("verifyTokenBtn").addEventListener("click", verifyToken);
     $("removeTokenBtn").addEventListener("click", () => {
@@ -727,8 +789,11 @@
   function init() {
     bind();
     state.route = parseHash();
+    const needsLogin = state.route.mode === "admin" && !isAdminAuthed();
+    if (needsLogin) state.route.mode = "consulta";
     history.replaceState(null, "", buildHash(state.route));
     openBook();
+    if (needsLogin) requestAdminLogin();
   }
 
   init();
