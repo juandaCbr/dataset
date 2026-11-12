@@ -48,5 +48,10 @@
   "rows": 63,
   "columns": 43,
   "updatedAt": "2026-11-12T20:31:59.476Z"
+ },
+ "exenciones_incentivos": {
+  "rows": 63,
+  "columns": 140,
+  "updatedAt": "2026-11-12T20:37:01.546Z"
  }
 }
