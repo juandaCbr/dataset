@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dataset ICA Colombia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
+      </span>
+      <div>
+        <h1>Dataset ICA Colombia</h1>
+        <p>Impuesto de Industria y Comercio Municipal</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span id="modeChip" class="chip chip-readonly">Modo lectura</span>
+      <button id="settingsBtn" class="btn btn-ghost-light" type="button">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        <span>Conexión GitHub</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Módulos del dataset">
+      <div class="sidebar-card">
+        <div class="admin-head">
+          <span class="admin-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+          </span>
+          <div>
+            <strong>Dataset Admin</strong>
+            <small id="sheetCountLabel">Gestión de 13 pestañas</small>
+          </div>
+          <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="sheetNav">
+            <span class="sr-only">Mostrar módulos</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+        <p class="nav-label">Módulos del dataset</p>
+        <nav id="sheetNav" class="sheet-nav"></nav>
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="panel">
+        <div class="view-head">
+          <div>
+            <div class="title-row">
+              <span id="viewTag" class="tag"></span>
+              <h2 id="viewTitle"></h2>
+            </div>
+            <p id="viewDesc" class="muted"></p>
+          </div>
+          <div class="last-update" id="lastUpdate"></div>
+        </div>
+
+        <div id="uploadArea" class="upload-area">
+          <label id="dropzone" class="dropzone" tabindex="0">
+            <input id="fileInput" type="file" accept=".csv,text/csv" hidden>
+            <svg class="dz-icon" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+            <strong>Arrastra o selecciona un archivo <span class="accent">.CSV</span></strong>
+            <span class="muted">Exportado desde Excel (CSV UTF-8 o CSV delimitado). Se leen los encabezados de la matriz y las filas con municipio.</span>
+          </label>
+          <div class="upload-options">
+            <fieldset class="segmented" aria-label="Modo de carga">
+              <label><input type="radio" name="mode" value="replace" checked><span>Reemplazar registros</span></label>
+              <label><input type="radio" name="mode" value="append"><span>Agregar a los existentes</span></label>
+            </fieldset>
+            <button id="downloadBtn" class="btn btn-secondary" type="button">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+              Descargar CSV
+            </button>
+          </div>
+        </div>
+
+        <div id="pendingBar" class="pending-bar" hidden>
+          <span id="pendingText">Hay cambios sin guardar.</span>
+          <div class="pending-actions">
+            <button id="discardBtn" class="btn btn-secondary" type="button">Descartar</button>
+            <button id="saveBtn" class="btn btn-primary" type="button">Guardar en GitHub</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="records-head">
+          <h3>Registros cargados <span id="recordCount" class="count">(0)</span></h3>
+          <div class="search">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="filterInput" type="search" placeholder="Filtrar registros…" aria-label="Filtrar registros">
+          </div>
+        </div>
+        <p id="columnInfo" class="muted small"></p>
+        <div id="tableWrap" class="table-wrap"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" id="settingsForm">
+      <h3>Conexión con GitHub</h3>
+      <p class="muted">Los datos se guardan como archivos JSON en <a id="repoLink" target="_blank" rel="noopener"></a>. Para subir cambios necesitas un token personal con permiso <b>Contents: Read and write</b> solo sobre este repositorio.</p>
+      <label class="field">
+        <span>Token personal (fine-grained)</span>
+        <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      </label>
+      <p class="warning">El token queda guardado solo en este navegador (localStorage). No lo uses en computadores compartidos y quítalo al terminar.</p>
+      <p id="settingsMsg" class="small" role="status"></p>
+      <div class="dialog-actions">
+        <button id="removeTokenBtn" class="btn btn-danger-ghost" type="button">Quitar token</button>
+        <span class="spacer"></span>
+        <button value="cancel" class="btn btn-secondary" formnovalidate>Cerrar</button>
+        <button id="verifyTokenBtn" class="btn btn-primary" type="button">Verificar y guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/csv.js"></script>
+  <script src="js/github.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
