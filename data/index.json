@@ -53,5 +53,10 @@
   "rows": 63,
   "columns": 140,
   "updatedAt": "2026-11-12T20:37:01.546Z"
+ },
+ "tarifas": {
+  "rows": 63,
+  "columns": 63,
+  "updatedAt": "2026-11-12T20:37:07.411Z"
  }
 }
