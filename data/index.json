@@ -28,5 +28,10 @@
   "rows": 63,
   "columns": 72,
   "updatedAt": "2026-11-12T20:30:56.932Z"
+ },
+ "actividades_no_sujetas": {
+  "rows": 63,
+  "columns": 33,
+  "updatedAt": "2026-11-12T20:31:09.626Z"
  }
 }
