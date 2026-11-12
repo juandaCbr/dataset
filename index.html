@@ -6,119 +6,140 @@
   <title>Dataset ICA Colombia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/></svg>
-      </span>
-      <div>
-        <h1>Dataset ICA Colombia</h1>
-        <p>Impuesto de Industria y Comercio Municipal</p>
-      </div>
-    </div>
-    <div class="topbar-actions">
-      <span id="modeChip" class="chip chip-readonly">Modo lectura</span>
-      <button id="settingsBtn" class="btn btn-ghost-light" type="button">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-        <span>Conexión GitHub</span>
+  <div class="app">
+    <!-- Barra superior: producto, modo (consulta / administración) y conexión -->
+    <header class="topbar">
+      <button id="menuBtn" class="icon-only menu-btn" type="button" aria-label="Abrir libros y filtros" aria-controls="sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-    </div>
-  </header>
+      <a class="product" href="#">
+        <svg class="mark" viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
+          <rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/>
+          <path d="M8 8h12M8 12.5h12M8 17h7" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="19.5" cy="18.5" r="2.6" fill="none" stroke="#fff" stroke-width="1.8"/>
+        </svg>
+        <span class="product-name">Dataset ICA Colombia</span>
+        <span class="product-scope">Impuesto de Industria y Comercio municipal</span>
+      </a>
+      <nav class="mode-tabs" aria-label="Modo">
+        <a href="#" data-mode="consulta" class="mode-tab">Consulta</a>
+        <a href="#" data-mode="admin" class="mode-tab">Administración</a>
+      </nav>
+      <button id="connectBtn" class="btn btn-ghost connect" type="button">
+        <span class="dot" aria-hidden="true"></span><span id="connectLabel">Conectar GitHub</span>
+      </button>
+    </header>
 
-  <div class="layout">
-    <aside class="sidebar" aria-label="Módulos del dataset">
-      <div class="sidebar-card">
-        <div class="admin-head">
-          <span class="admin-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
-          </span>
-          <div>
-            <strong>Dataset Admin</strong>
-            <small id="sheetCountLabel">Gestión de 13 pestañas</small>
-          </div>
-          <button id="menuToggle" class="menu-toggle" type="button" aria-expanded="false" aria-controls="sheetNav">
-            <span class="sr-only">Mostrar módulos</span>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </button>
-        </div>
-        <p class="nav-label">Módulos del dataset</p>
-        <nav id="sheetNav" class="sheet-nav"></nav>
+    <!-- Barra lateral: libros y búsqueda -->
+    <aside id="sidebar" class="sidebar" aria-label="Libros y búsqueda">
+      <div class="sidebar-head">
+        <span>Libros y búsqueda</span>
+        <button id="closeMenuBtn" class="icon-only" type="button" aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
       </div>
+
+      <form id="filters" class="filters" role="search" onsubmit="return false">
+        <label class="field">
+          <span>Departamento</span>
+          <select id="depSelect"></select>
+        </label>
+        <label class="field">
+          <span>Municipio</span>
+          <select id="munSelect"></select>
+        </label>
+        <label class="field">
+          <span>Nombre de la columna</span>
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
+            <input id="colInput" type="search" autocomplete="off" placeholder="Ej.: tarifa, empleo, Art.">
+          </span>
+        </label>
+        <button id="clearFilters" class="text-btn" type="button">Limpiar búsqueda</button>
+      </form>
+
+      <p class="nav-label">Libros</p>
+      <nav id="bookNav" class="book-nav"></nav>
     </aside>
 
-    <main class="content">
-      <section class="panel">
-        <div class="view-head">
-          <div>
-            <div class="title-row">
-              <span id="viewTag" class="tag"></span>
-              <h2 id="viewTitle"></h2>
-            </div>
-            <p id="viewDesc" class="muted"></p>
-          </div>
-          <div class="last-update" id="lastUpdate"></div>
+    <!-- Hoja de trabajo -->
+    <main class="sheet" id="main">
+      <div class="title-row">
+        <div class="title-text">
+          <h1 id="bookTitle">Cargando…</h1>
+          <p id="bookMeta" class="meta"></p>
         </div>
+        <div class="title-actions" id="titleActions"></div>
+      </div>
 
-        <div id="uploadArea" class="upload-area">
-          <label id="dropzone" class="dropzone" tabindex="0">
-            <input id="fileInput" type="file" accept=".csv,text/csv" hidden>
-            <svg class="dz-icon" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
-            <strong>Arrastra o selecciona un archivo <span class="accent">.CSV</span></strong>
-            <span class="muted">Exportado desde Excel (CSV UTF-8 o CSV delimitado). Se leen los encabezados de la matriz y las filas con municipio.</span>
-          </label>
-          <div class="upload-options">
-            <fieldset class="segmented" aria-label="Modo de carga">
-              <label><input type="radio" name="mode" value="replace" checked><span>Reemplazar registros</span></label>
-              <label><input type="radio" name="mode" value="append"><span>Agregar a los existentes</span></label>
-            </fieldset>
-            <button id="downloadBtn" class="btn btn-secondary" type="button">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-              Descargar CSV
-            </button>
-          </div>
-        </div>
-
-        <div id="pendingBar" class="pending-bar" hidden>
-          <span id="pendingText">Hay cambios sin guardar.</span>
-          <div class="pending-actions">
-            <button id="discardBtn" class="btn btn-secondary" type="button">Descartar</button>
-            <button id="saveBtn" class="btn btn-primary" type="button">Guardar en GitHub</button>
-          </div>
+      <section id="adminStrip" class="admin-strip" hidden aria-label="Carga de CSV">
+        <label id="dropzone" class="dropzone" tabindex="0">
+          <input id="fileInput" type="file" accept=".csv,text/csv" hidden aria-describedby="fileHint">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 15v4h14v-4"/></svg>
+          <span><strong>Subir CSV de este libro</strong> <span class="muted">arrástralo aquí o haz clic</span></span>
+          <span id="fileHint" class="hint">Solo .csv exportado de Excel</span>
+        </label>
+        <div class="segmented" role="radiogroup" aria-label="Al subir un CSV">
+          <label><input type="radio" name="mode" value="replace" checked><span>Reemplazar registros</span></label>
+          <label><input type="radio" name="mode" value="append"><span>Agregar a los existentes</span></label>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="records-head">
-          <h3>Registros cargados <span id="recordCount" class="count">(0)</span></h3>
-          <div class="search">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-            <input id="filterInput" type="search" placeholder="Filtrar registros…" aria-label="Filtrar registros">
-          </div>
-        </div>
-        <p id="columnInfo" class="muted small"></p>
-        <div id="tableWrap" class="table-wrap"></div>
-      </section>
+      <div id="filterSummary" class="filter-summary" hidden></div>
+      <div id="content" class="content"></div>
     </main>
   </div>
 
-  <dialog id="settingsDialog" class="dialog">
-    <form method="dialog" id="settingsForm">
-      <h3>Conexión con GitHub</h3>
-      <p class="muted">Los datos se guardan como archivos JSON en <a id="repoLink" target="_blank" rel="noopener"></a>. Para subir cambios necesitas un token personal con permiso <b>Contents: Read and write</b> solo sobre este repositorio.</p>
-      <label class="field">
-        <span>Token personal (fine-grained)</span>
-        <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-      </label>
-      <p class="warning">El token queda guardado solo en este navegador (localStorage). No lo uses en computadores compartidos y quítalo al terminar.</p>
-      <p id="settingsMsg" class="small" role="status"></p>
-      <div class="dialog-actions">
-        <button id="removeTokenBtn" class="btn btn-danger-ghost" type="button">Quitar token</button>
+  <div id="scrim" class="scrim" hidden></div>
+
+  <!-- Editor de registro -->
+  <dialog id="editDialog" class="drawer" aria-labelledby="editTitle">
+    <form id="editForm" method="dialog">
+      <header class="drawer-head">
+        <div>
+          <h2 id="editTitle">Editar registro</h2>
+          <p id="editSub" class="meta"></p>
+        </div>
+        <button class="icon-only" value="cancel" formnovalidate aria-label="Cerrar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </header>
+      <div class="drawer-search">
+        <span class="input-icon">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg>
+          <input id="fieldFilter" type="search" autocomplete="off" placeholder="Buscar campo" aria-label="Buscar campo">
+        </span>
+        <span id="fieldCount" class="meta"></span>
+      </div>
+      <div id="editFields" class="drawer-body"></div>
+      <footer class="drawer-foot">
+        <span id="editChanged" class="meta"></span>
         <span class="spacer"></span>
-        <button value="cancel" class="btn btn-secondary" formnovalidate>Cerrar</button>
+        <button class="btn" value="cancel" formnovalidate>Cancelar</button>
+        <button id="applyEdit" class="btn btn-primary" type="button">Aplicar cambios</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Conexión con GitHub -->
+  <dialog id="settingsDialog" class="modal" aria-labelledby="settingsTitle">
+    <form method="dialog">
+      <h2 id="settingsTitle">Conexión con GitHub</h2>
+      <p class="meta">Los libros se guardan como archivos JSON en <a id="repoLink" target="_blank" rel="noopener"></a>. Para guardar cambios se necesita un token personal con permiso <b>Contents: Read and write</b> sobre ese repositorio.</p>
+      <label class="field">
+        <span>Token personal</span>
+        <input id="tokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…" aria-describedby="tokenNote">
+      </label>
+      <p id="tokenNote" class="notice">El token queda guardado solo en este navegador. No lo uses en computadores compartidos y quítalo al terminar.</p>
+      <p id="settingsMsg" class="meta" role="status"></p>
+      <div class="modal-actions">
+        <button id="removeTokenBtn" class="text-btn danger" type="button">Quitar token</button>
+        <span class="spacer"></span>
+        <button value="cancel" class="btn" formnovalidate>Cerrar</button>
         <button id="verifyTokenBtn" class="btn btn-primary" type="button">Verificar y guardar</button>
       </div>
     </form>

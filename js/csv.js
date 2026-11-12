@@ -85,7 +85,9 @@
     const munCol = findCol("municipio", 3);
     const dataRows = raw.slice(headerIdx + 1).filter((r) =>
       // Las filas de plantilla sin diligenciar traen "0" desde fórmulas: se exige texto.
-      /^\d+$/.test(clean(r[0])) && /\p{L}/u.test(clean(r[depCol])) && /\p{L}/u.test(clean(r[munCol]))
+      /^\d+$/.test(clean(r[0])) && /\p{L}/u.test(clean(r[depCol])) && /\p{L}/u.test(clean(r[munCol])) &&
+      norm(r[depCol]) !== "departamento" // fila de encabezado repetida
+
     );
 
     // Nombres de columna combinando grupo (relleno hacia la derecha) y subencabezado.

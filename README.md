@@ -16,14 +16,24 @@ No hay servidor ni base de datos aparte: **el repositorio de GitHub es la base d
 - **Lectura:** cualquiera que abra el sitio (GitHub Pages) lee esos JSON.
 - **Escritura:** el administrador conecta un token personal de GitHub; al pulsar *Guardar en GitHub* la app hace un commit con la API de contenidos. Cada guardado queda en el historial del repositorio, así que cualquier versión anterior se puede recuperar.
 
-## Flujo del administrador
+## Consulta
+
+La barra lateral lista los 13 libros y tiene tres campos de búsqueda que se mantienen al cambiar de libro:
+
+- **Departamento** y **Municipio** (menús desplegables): filtran los registros. Con un municipio elegido, el libro se muestra como una ficha agrupada por los encabezados de la matriz.
+- **Nombre de la columna** (texto): deja solo las columnas cuyo nombre contiene esas palabras, sin importar tildes ni mayúsculas.
+
+La búsqueda queda en la URL (`#tarifas?dep=Antioquia&mun=Abejorral&col=agricultura`), así que se puede compartir el enlace.
+
+## Administración
+
+Se entra con la pestaña **Administración** de la barra superior.
 
 1. En Excel, abrir la hoja y usar *Archivo › Guardar como › CSV UTF-8* (también sirve *CSV delimitado por comas*).
-2. Elegir la pestaña en el menú lateral y arrastrar el CSV. Solo se aceptan `.csv`.
-3. La app detecta la fila de encabezados (la que contiene “Código Dane”), combina el grupo de la fila superior con el subencabezado y toma solo las filas con N°, Departamento y Municipio.
-4. Revisar la tabla (filtrar, eliminar registros) y pulsar **Guardar en GitHub**.
-
-*Reemplazar registros* sustituye todo el contenido de la pestaña; *Agregar a los existentes* une por nombre de columna.
+2. Elegir el libro y arrastrar el CSV. Solo se aceptan `.csv`. *Reemplazar registros* sustituye el libro completo; *Agregar a los existentes* une por nombre de columna.
+3. **Editar** (lápiz en la fila, o botón en la ficha) abre un panel con todos los campos del registro y un buscador de campos. Los campos cambiados quedan marcados con un punto hasta guardar.
+4. **Nuevo registro** y **Eliminar** también están disponibles.
+5. Nada se publica hasta pulsar **Guardar en GitHub**; **Descartar** vuelve a la última versión guardada.
 
 ## Publicar y conectar
 

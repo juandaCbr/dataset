@@ -1,3 +1,4 @@
 *.xlsx
 ~$*
 _tmp_test/
+.taste-skill/
