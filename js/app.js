@@ -325,9 +325,16 @@ function matchesColumn(name) {
       } else {
         html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
       }
+    
+      if (total) {
+        html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
+      }
+    
     } else if (total) {
-      html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
+      // En Consulta ya no se muestra Descargar CSV
     }
+    $("titleActions").innerHTML = html;
+  }
 
   function skeleton() {
     const row = `<tr>${"<td><div></div></td>".repeat(6)}</tr>`;
