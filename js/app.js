@@ -324,10 +324,14 @@ function matchesColumn(name) {
           <button class="btn btn-primary" data-act="save" type="button" id="saveBtn">Guardar en GitHub</button>`;
       } else {
         html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
+      }
+    
+      if (total) {
         html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
       }
+    
     } else if (total) {
-      
+      // En Consulta ya no se muestra Descargar CSV
     }
 
   function skeleton() {
