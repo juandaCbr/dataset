@@ -9,6 +9,7 @@
 
   const state = {
     route: { slug: sheets[0].slug, dep: "", mun: "", col: "", mode: "consulta" },
+    adminQuery: "",         // texto del buscador general de Administración
     cache: {},              // slug -> { data, sha, saved, dirty, edits: WeakMap(row -> Set(col)) }
     loading: false,
   };
@@ -170,17 +171,26 @@
     if (state.route.slug === sheet.slug) render();
   }
 
-  // Los filtros (departamento, municipio, columna) aplican en Consulta y en Administración
+  // Consulta filtra por departamento y municipio; Administración usa un buscador
+  // general que busca el texto en cualquier celda del registro.
   function filteredRows(data) {
+    const rows = data.rows.map((row, i) => ({ row, i }));
+    if (state.route.mode === "admin") {
+      const words = norm(state.adminQuery).split(/\s+/).filter(Boolean);
+      if (!words.length) return rows;
+      return rows.filter(({ row }) => {
+        const text = norm(row.map((v) => v ?? "").join(" "));
+        return words.every((w) => text.includes(w));
+      });
+    }
     const id = idCols(data.columns);
     const { dep, mun } = state.route;
-    return data.rows
-      .map((row, i) => ({ row, i }))
-      .filter(({ row }) => (!dep || row[id.dep] === dep) && (!mun || row[id.mun] === mun));
+    return rows.filter(({ row }) => (!dep || row[id.dep] === dep) && (!mun || row[id.mun] === mun));
   }
 
   function matchesColumn(name) {
-    const words = norm(state.route.col).split(/\s+/).filter(Boolean);
+    const query = state.route.mode === "admin" ? "" : state.route.col;
+    const words = norm(query).split(/\s+/).filter(Boolean);
     const n = norm(name);
     return words.every((w) => n.includes(w));
   }
@@ -205,7 +215,9 @@
     $("bookTitle").textContent = sheet.name;
     $("bookStats").innerHTML = "";
     $("adminStrip").hidden = !admin;
-    $("filters").hidden = false;
+    $("filters").hidden = admin;
+    $("adminSearch").hidden = !admin;
+    if ($("adminQuery").value !== state.adminQuery) $("adminQuery").value = state.adminQuery;
 
     const e = entry();
     if (state.loading || !e) {
@@ -250,6 +262,10 @@
     }
 
     const rows = filteredRows(data);
+    if (!rows.length && admin) {
+      $("content").innerHTML = `<div class="state"><strong>Ningún registro contiene “${esc(state.adminQuery.trim())}”</strong><span class="muted">Este libro tiene ${plural(data.rows.length, "registro", "registros")}; prueba con otra palabra o limpia la búsqueda.</span><br><button class="text-btn" data-act="clear" type="button">Limpiar búsqueda</button></div>`;
+      return;
+    }
     if (!rows.length) {
       const who = state.route.mun || state.route.dep;
       $("content").innerHTML = `<div class="state"><strong>${esc(who)} no aparece en ${esc(sheet.name)}</strong><span class="muted">Este libro tiene ${plural(data.rows.length, "registro", "registros")}; prueba con otro municipio o limpia la búsqueda.</span><br><button class="text-btn" data-act="clear" type="button">Limpiar búsqueda</button></div>`;
@@ -295,7 +311,7 @@
     const total = data.rows.length;
     const shown = filteredRows(data).length;
     const dataCols = data.columns.filter((_, i) => ![id.n, id.dane, id.dep, id.mun].includes(i));
-    const colsShown = state.route.col ? dataCols.filter(matchesColumn).length : dataCols.length;
+    const colsShown = !admin && state.route.col ? dataCols.filter(matchesColumn).length : dataCols.length;
 
     $("bookMeta").textContent = sheet.desc;
     const stat = (value, of, label) => `<div><dt>${label}</dt><dd><span class="big">${value}</span>${of ? `<span class="of"> de ${of}</span>` : ""}</dd></div>`;
@@ -634,12 +650,12 @@
 
   function download() {
     const { data } = entry();
-    const rows = filteredRows(data).map(({ row }) => row);
+    // Descargar CSV solo existe en Administración: siempre baja el libro completo
+    const rows = data.rows;
     const blob = new Blob([window.CSVTools.toCSV(data.columns, rows)], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    const suffix = [state.route.dep, state.route.mun].filter(Boolean).join("-");
-    a.download = `${state.route.slug}${suffix ? `-${norm(suffix).replace(/[^a-z0-9]+/g, "-")}` : ""}.csv`;
+    a.download = `${state.route.slug}.csv`;
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
@@ -731,6 +747,11 @@
       }
       go(patch);
     });
+    let tq;
+    $("adminQuery").addEventListener("input", (ev) => {
+      clearTimeout(tq);
+      tq = setTimeout(() => { state.adminQuery = ev.target.value; render(); }, 180);
+    });
     let t;
     $("colInput").addEventListener("input", (ev) => {
       clearTimeout(t);
@@ -746,6 +767,7 @@
         else if (a === "discard") discard();
         else if (a === "download") download();
         else if (a === "new") openEditor(null);
+        else if (a === "clear" && state.route.mode === "admin") { state.adminQuery = ""; render(); $("adminQuery").focus(); }
         else if (a === "clear") go({ dep: "", mun: "", col: "" });
         else if (a === "filters") { setMenu(true); $("depSelect").focus(); }
         else if (a === "retry") { delete state.cache[state.route.slug]; openBook(); }
