@@ -171,27 +171,18 @@
   }
 
   function filteredRows(data) {
-  const id = idCols(data.columns);
+    const id = idCols(data.columns);
+    const { dep, mun } = state.route;
+    return data.rows
+      .map((row, i) => ({ row, i }))
+      .filter(({ row }) => (!dep || row[id.dep] === dep) && (!mun || row[id.mun] === mun));
+  }
 
-  // En administración se muestran todos los registros
-  const { dep, mun } = state.route.mode === "admin"
-    ? { dep: "", mun: "" }
-    : state.route;
-
-  return data.rows
-    .map((row, i) => ({ row, i }))
-    .filter(({ row }) =>
-      (!dep || row[id.dep] === dep) &&
-      (!mun || row[id.mun] === mun)
-    );
-}
-
-function matchesColumn(name) {
-  const query = state.route.mode === "admin" ? "" : state.route.col;
-  const words = norm(query).split(/\s+/).filter(Boolean);
-  const n = norm(name);
-  return words.every((w) => n.includes(w));
-}
+  function matchesColumn(name) {
+    const words = norm(state.route.col).split(/\s+/).filter(Boolean);
+    const n = norm(name);
+    return words.every((w) => n.includes(w));
+  }
 
   // ---------- Render ----------
   function render() {
@@ -263,7 +254,7 @@ function matchesColumn(name) {
       $("content").innerHTML = `<div class="state"><strong>${esc(who)} no aparece en ${esc(sheet.name)}</strong><span class="muted">Este libro tiene ${plural(data.rows.length, "registro", "registros")}; prueba con otro municipio o limpia la búsqueda.</span><br><button class="text-btn" data-act="clear" type="button">Limpiar búsqueda</button></div>`;
       return;
     }
-    if (!admin && state.route.mun) renderFichas(data, rows, admin);
+    if (state.route.mun) renderFichas(data, rows, admin);
     else renderTable(data, rows, admin);
   }
 
@@ -303,9 +294,7 @@ function matchesColumn(name) {
     const total = data.rows.length;
     const shown = filteredRows(data).length;
     const dataCols = data.columns.filter((_, i) => ![id.n, id.dane, id.dep, id.mun].includes(i));
-    const colsShown = !admin && state.route.col
-  ? dataCols.filter(matchesColumn).length
-  : dataCols.length;
+    const colsShown = state.route.col ? dataCols.filter(matchesColumn).length : dataCols.length;
 
     $("bookMeta").textContent = sheet.desc;
     const stat = (value, of, label) => `<div><dt>${label}</dt><dd><span class="big">${value}</span>${of ? `<span class="of"> de ${of}</span>` : ""}</dd></div>`;
@@ -318,6 +307,9 @@ function matchesColumn(name) {
     const active = [state.route.dep, state.route.mun, state.route.col].filter(Boolean).length;
     let html = total && !admin ? `<button class="btn mobile-only" data-act="filters" type="button" aria-controls="sidebar">Buscar${active ? ` (${active})` : ""}</button>` : "";
     if (admin) {
+      if (total) {
+        html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
+      }
       if (e.dirty) {
         html += `<span class="unsaved">Cambios sin guardar</span>
           <button class="btn" data-act="discard" type="button">Descartar</button>
@@ -325,14 +317,19 @@ function matchesColumn(name) {
       } else {
         html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
       }
-    
-      if (total) {
-        html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
+  
+    } else if (admin) {
+      if (e.dirty) {
+        html += `<span class="unsaved">Cambios sin guardar</span>
+          <button class="btn" data-act="discard" type="button">Descartar</button>
+          <button class="btn btn-primary" data-act="save" type="button" id="saveBtn">Guardar en GitHub</button>`;
+      } else {
+        html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
       }
-    
-    } else if (total) {
-      // En Consulta ya no se muestra Descargar CSV
+    } else if (admin && total) {
+      html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
     }
+    $("titleActions").innerHTML = html;
     $("titleActions").innerHTML = html;
   }
 
@@ -499,7 +496,7 @@ function matchesColumn(name) {
   function updateChanged() {
     const n = [...$("editFields").querySelectorAll("[data-col]")].filter((el) => {
       const c = Number(el.dataset.col);
-      const changed = el.value.trim() !== (editing.original[c] ?? "");
+      const changed = el.value() !== (editing.original[c] ?? "");
       el.closest(".ef").classList.toggle("changed", changed);
       return changed;
     }).length;
