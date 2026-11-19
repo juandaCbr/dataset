@@ -170,6 +170,7 @@
     if (state.route.slug === sheet.slug) render();
   }
 
+  // Los filtros (departamento, municipio, columna) aplican en Consulta y en Administración
   function filteredRows(data) {
     const id = idCols(data.columns);
     const { dep, mun } = state.route;
@@ -204,7 +205,7 @@
     $("bookTitle").textContent = sheet.name;
     $("bookStats").innerHTML = "";
     $("adminStrip").hidden = !admin;
-    $("filters").hidden = admin;
+    $("filters").hidden = false;
 
     const e = entry();
     if (state.loading || !e) {
@@ -254,7 +255,7 @@
       $("content").innerHTML = `<div class="state"><strong>${esc(who)} no aparece en ${esc(sheet.name)}</strong><span class="muted">Este libro tiene ${plural(data.rows.length, "registro", "registros")}; prueba con otro municipio o limpia la búsqueda.</span><br><button class="text-btn" data-act="clear" type="button">Limpiar búsqueda</button></div>`;
       return;
     }
-    if (state.route.mun) renderFichas(data, rows, admin);
+    if (!admin && state.route.mun) renderFichas(data, rows, admin);
     else renderTable(data, rows, admin);
   }
 
@@ -317,19 +318,9 @@
       } else {
         html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
       }
-  
-    } else if (admin) {
-      if (e.dirty) {
-        html += `<span class="unsaved">Cambios sin guardar</span>
-          <button class="btn" data-act="discard" type="button">Descartar</button>
-          <button class="btn btn-primary" data-act="save" type="button" id="saveBtn">Guardar en GitHub</button>`;
-      } else {
-        html += `<button class="btn" data-act="new" type="button"${total ? "" : " disabled"}>Nuevo registro</button>`;
-      }
-    } else if (admin && total) {
-      html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
+    } else if (total) {
+      // En Consulta ya no se muestra Descargar CSV
     }
-    $("titleActions").innerHTML = html;
     $("titleActions").innerHTML = html;
   }
 
@@ -496,7 +487,7 @@
   function updateChanged() {
     const n = [...$("editFields").querySelectorAll("[data-col]")].filter((el) => {
       const c = Number(el.dataset.col);
-      const changed = el.value() !== (editing.original[c] ?? "");
+      const changed = el.value.trim() !== (editing.original[c] ?? "");
       el.closest(".ef").classList.toggle("changed", changed);
       return changed;
     }).length;
