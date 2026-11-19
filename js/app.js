@@ -329,10 +329,12 @@ function matchesColumn(name) {
       if (total) {
         html += `<button class="btn" data-act="download" type="button">Descargar CSV</button>`;
       }
-
+    
     } else if (total) {
-        // En Consulta ya no se muestra Descargar CSV
+      // En Consulta ya no se muestra Descargar CSV
     }
+    $("titleActions").innerHTML = html;
+  }
 
   function skeleton() {
     const row = `<tr>${"<td><div></div></td>".repeat(6)}</tr>`;
